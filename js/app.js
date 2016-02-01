@@ -2,14 +2,15 @@
 	'use strict';
 	
 	// TODO
-	// change css after checkbox click and change status
 	// check all checkbox
 	// count todo left
 	// print in anoter tabs
 	// delete tasks
 
 	var taskList = [],
-		ID = 1;
+		ID = 1,
+		checkboxes = document.getElementsByClassName('toggle'),
+		deleteButtons = document.getElementsByClassName('destroy');
 
 
 	var findById = function (id) {
@@ -52,13 +53,14 @@
 	 			'<div class="view">',
 					'<input id="'+newTask.id+'" class="toggle" type="checkbox">',
 					'<label id="'+newTask.id+'">'+newTask.value+'</label>',
-					'<button class="destroy"></button>',
+					'<button id="'+newTask.id+'" class="destroy"></button>',
 				'</div>',
 				'<input class="edit" value="Rule the web">',
 			 ].join('');
 
 		 	 newItem.innerHTML = defaultItem;
 		 	 todoList.appendChild(newItem);
+		 	 checkboxes = document.getElementsByClassName('toggle');
 	};
 
 	var printTasks = function (taskList) {
@@ -70,6 +72,8 @@
 		for (var i = 0; i<list.length; i++){
 			generateTask(list[i]);
 		}
+		addCheckboxesEvent();
+		addDeleteEvents();
 	};
 
 	var printActiveTasks = function (taskList) {
@@ -111,8 +115,21 @@
 			task.status = 'complete';
 		}
 		console.log(task);
-
 	};
+
+	var deleteTask = function (item) {
+		var searchId = item.getAttribute('id'),
+			taskID;
+		for (var i = 0;i < taskList.length; i++) {
+			console.log(i, +searchId)
+			if (taskList[i].id === +searchId) {
+				taskID = i;
+			}
+		}
+
+		taskList.splice(taskID,1);
+		printTasks(taskList);
+	}
 
 	var toggleFooter = function () {
 		var footer = document.getElementById('info');
@@ -123,33 +140,36 @@
 		}
 	};
 
-	var checkboxes = document.getElementsByClassName('toggle');
-
 	var addCheckboxesEvent = function () {
 		for (var i=0; i<checkboxes.length; i++){
+			checkboxes[i].removeEventListener("change", function () {
+		 		toggleStatus(this);
+		 	}, false);
 			checkboxes[i].addEventListener("change", function () {
 		 		toggleStatus(this);
 		 	}, false);
 		}
-	}	
+	}
+
+	var addDeleteEvents = function () {
+		for (var i=0; i<deleteButtons.length; i++){
+			deleteButtons[i].removeEventListener("click");
+			deleteButtons[i].addEventListener("click", function () {
+		 		deleteTask(this);
+		 	}, false);
+		}
+		console.log(deleteButtons)
+	}
+
 	document.getElementById("todo-form").addEventListener ("submit", function (e) {
 		e.preventDefault();
 		createTask();
 		printTasks(taskList);
 		toggleFooter();
-		addCheckboxesEvent();
+		// addCheckboxesEvent();
+		// addDeleteEvents();
+		
 	}, false);
-
-
-	
-	// checkboxes[0].addEventListener ("click", function () {
-	// 		toggleStatus(checkboxes[0]);
-	// 	}, false);
-	// 	checkboxes[1].addEventListener ("click", function () {
-	// 		toggleStatus(checkboxes[1]);
-	// 	}, false);
-	// }
-	
 
 	// Your starting point. Enjoy the ride!	
 
