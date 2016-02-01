@@ -14,11 +14,11 @@
 
 
 	var findById = function (id) {
-		var searchId = id;
+		var searchId = +id;
 		
 		for (var i=0; i < taskList.length; i++){
-			if (taskList[i].id = searchId) {
-				return taskList[i];
+			if (taskList[i].id === searchId) {
+				return i;
 			}
 		}
 	};
@@ -39,33 +39,55 @@
 
 	var generateTask = function(task) {
 		var todoList = document.getElementById('todo-list'),
-			newTask = {},
 			defaultItem = '',
-			newItem = document.createElement('li');
+			newItem = document.createElement('li'),
+			checked;
 
-			newTask = {
-				id: task.id,
-				value: task.value,
-				status: task.status
-			}
-
+			checked = task.status === "complete" ? 'checked="checked"' : '';
 			defaultItem = [
 	 			'<div class="view">',
-					'<input id="'+newTask.id+'" class="toggle" type="checkbox">',
-					'<label id="'+newTask.id+'">'+newTask.value+'</label>',
-					'<button id="'+newTask.id+'" class="destroy"></button>',
+					'<input id="'+task.id+'" class="toggle" type="checkbox" '+checked+'>',
+					'<label id="'+task.id+'">'+task.value+'</label>',
+					'<button id="'+task.id+'" class="destroy"></button>',
 				'</div>',
 				'<input class="edit" value="Rule the web">',
 			 ].join('');
 
+			  if (task.status === 'complete' ) {
+			 		newItem.className = 'completed';
+			  }
+
 		 	 newItem.innerHTML = defaultItem;
 		 	 todoList.appendChild(newItem);
-		 	 checkboxes = document.getElementsByClassName('toggle');
 	};
 
-	var printTasks = function (taskList) {
+	var printTasks = function (type) {
 		var list = taskList,
-			todoList = document.getElementById('todo-list');
+			todoList = document.getElementById('todo-list'),
+			statusParam = type;
+
+			console.log(statusParam);
+
+			todoList.innerHTML = '';
+
+		for (var i = 0; i<list.length; i++){
+			if((statusParam === 'active') && (list[i].status === 'active')){
+				generateTask(list[i]);
+			} else if ((statusParam === 'complete') && (list[i].status === 'complete')) {
+				generateTask(list[i]);
+			}
+		}
+		addCheckboxesEvent();
+		addDeleteEvents();
+		document.getElementById('todo-count').innerHTML = ''+countItemLeft()+'';
+	};
+
+	var printAllTasks = function (type) {
+		var list = taskList,
+			todoList = document.getElementById('todo-list'),
+			statusParam = type;
+
+			console.log(statusParam);
 
 			todoList.innerHTML = '';
 
@@ -74,62 +96,57 @@
 		}
 		addCheckboxesEvent();
 		addDeleteEvents();
-	};
-
-	var printActiveTasks = function (taskList) {
-		var list = taskList,
-			todoList = document.getElementById('todo-list');
-
-			todoList.innerHTML = '';
-
-		for (var i = 0; i<list.length; i++){
-			if(list[i].status = 'active'){
-				generateTask(list[i]);
-			}
-		}
-	};
-
-	var printCompleteTasks = function (taskList) {
-		var list = taskList,
-			todoList = document.getElementById('todo-list');
-
-			todoList.innerHTML = '';
-
-		for (var i = 0; i<list.length; i++){
-			if(list[i].status = 'complete'){
-				generateTask(list[i]);
-			}
-		}
+		document.getElementById('todo-count').innerHTML = ''+countItemLeft()+'';
 	};
 
 	var toggleStatus = function (item) {
-		var searchId = item.getAttribute('id'),
-		 	task = findById(searchId),
+		var searchId = +item.getAttribute('id'),
+		 	taskID = findById(searchId),
 			itemList = item.parentNode.parentNode;
+			console.log(searchId);
 
 		if(itemList.classList.contains('completed')){
 			itemList.className = "";
-			task.status = 'active';
+			taskList[taskID].status = 'active';
 		} else {
 			itemList.className = "completed";
-			task.status = 'complete';
+			taskList[taskID].status = 'complete';
 		}
-		console.log(task);
+		
+		printAllTasks();
+
 	};
 
 	var deleteTask = function (item) {
 		var searchId = item.getAttribute('id'),
 			taskID;
+
 		for (var i = 0;i < taskList.length; i++) {
-			console.log(i, +searchId)
 			if (taskList[i].id === +searchId) {
 				taskID = i;
 			}
 		}
 
 		taskList.splice(taskID,1);
-		printTasks(taskList);
+		toggleFooter();
+		printAllTasks();
 	}
+
+	var countItemLeft = function () { 
+		var counter = 0,
+			desc = '';
+		for (var i=0; i<taskList.length; i++){
+				if (taskList[i].status === 'active') {
+					counter++;
+				};
+			}
+		if(counter > 1){
+			desc = ' items left';
+		} else {
+			desc= ' item left';
+		}
+		return counter + desc;
+	};
 
 	var toggleFooter = function () {
 		var footer = document.getElementById('info');
@@ -149,7 +166,7 @@
 		 		toggleStatus(this);
 		 	}, false);
 		}
-	}
+	};
 
 	var addDeleteEvents = function () {
 		for (var i=0; i<deleteButtons.length; i++){
@@ -158,19 +175,33 @@
 		 		deleteTask(this);
 		 	}, false);
 		}
-		console.log(deleteButtons)
 	}
 
 	document.getElementById("todo-form").addEventListener ("submit", function (e) {
 		e.preventDefault();
 		createTask();
-		printTasks(taskList);
+		printAllTasks();
 		toggleFooter();
-		// addCheckboxesEvent();
-		// addDeleteEvents();
 		
 	}, false);
 
+	document.getElementById("all").addEventListener("click", function (e) {
+		e.preventDefault();
+		printAllTasks();
+
+		
+	}, false);
+	document.getElementById("active").addEventListener ("click", function (e) {
+		e.preventDefault();
+		printTasks('active');
+		
+		
+	}, false);
+	document.getElementById("completed").addEventListener ("click", function (e) {
+		e.preventDefault();
+		printTasks('complete');
+		
+	}, false);
 	// Your starting point. Enjoy the ride!	
 
 })(window);
