@@ -11,6 +11,7 @@
 	var taskList = [],
 		ID = 1;
 
+
 	var findById = function (id) {
 		var searchId = id;
 		
@@ -97,15 +98,23 @@
 		}
 	};
 
-	var toogleComplete = function (id) {
-		var searchId = id,
-			task = findById(searchId);
+	var toggleStatus = function (item) {
+		var searchId = item.getAttribute('id'),
+		 	task = findById(searchId),
+			itemList = item.parentNode.parentNode;
 
-		task.status = 'complete';
+		if(itemList.classList.contains('completed')){
+			itemList.className = "";
+			task.status = 'active';
+		} else {
+			itemList.className = "completed";
+			task.status = 'complete';
+		}
+		console.log(task);
 
 	};
 
-	var toogleFooter = function () {
+	var toggleFooter = function () {
 		var footer = document.getElementById('info');
 		if (taskList.length < 1) {
 			footer.style.display = 'none';
@@ -114,29 +123,33 @@
 		}
 	};
 
-	var checkCheckboxes = function (e) {
-    	var checkboxes = document.getElementsByTagName('input');
-    	if (e.checked) {
-        	for (var i = 0; i < checkboxes.length; i++) {
-            	if (checkboxes[i].type == 'checkbox') {
-                	checkboxes[i].checked = true;
-            	}
-        	}
-    	} else {
-        	for (var i = 0; i < checkboxes.length; i++) {
-            	if (checkboxes[i].type == 'checkbox') {
-                	checkboxes[i].checked = false;
-            	}
-        	}
-    	}
- 	}
+	var checkboxes = document.getElementsByClassName('toggle');
 
+	var addCheckboxesEvent = function () {
+		for (var i=0; i<checkboxes.length; i++){
+			checkboxes[i].addEventListener("change", function () {
+		 		toggleStatus(this);
+		 	}, false);
+		}
+	}	
 	document.getElementById("todo-form").addEventListener ("submit", function (e) {
 		e.preventDefault();
 		createTask();
 		printTasks(taskList);
-		toogleFooter();	
-	}, false);	 
+		toggleFooter();
+		addCheckboxesEvent();
+	}, false);
+
+
+	
+	// checkboxes[0].addEventListener ("click", function () {
+	// 		toggleStatus(checkboxes[0]);
+	// 	}, false);
+	// 	checkboxes[1].addEventListener ("click", function () {
+	// 		toggleStatus(checkboxes[1]);
+	// 	}, false);
+	// }
+	
 
 	// Your starting point. Enjoy the ride!	
 
